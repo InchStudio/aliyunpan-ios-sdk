@@ -26,14 +26,14 @@ public struct AliyunpanClientConfig {
     }
 }
 
-public class AliyunpanClient {
+public actor AliyunpanClient {
     private let config: AliyunpanClientConfig
     
     private var tokenStorageKey: String {
         "com.aliyunpanSDK.accessToken_\(config.appId)_\(config.identifier ?? "-")"
     }
     
-    @MainActor var token: AliyunpanToken? {
+    var token: AliyunpanToken? {
         willSet {
             if token != newValue,
                let data = try? JSONParameterEncoder().encode(newValue) {
@@ -42,8 +42,13 @@ public class AliyunpanClient {
         }
     }
     
+    public var tokenData: Data? {
+        guard let token else { return nil }
+        return try? JSONParameterEncoder().encode(token)
+    }
+    
     /// 获取当前持久化的 accessToken
-    @MainActor public var accessToken: String? {
+    public var accessToken: String? {
         token?.access_token
     }
     
@@ -74,7 +79,7 @@ public class AliyunpanClient {
     }
     
     /// 强制清除 token 持久化
-    @MainActor public func cleanToken() {
+    public func cleanToken() {
         token = nil
     }
     
@@ -93,9 +98,7 @@ public class AliyunpanClient {
             appId: config.appId,
             scope: config.scope
         )
-        await MainActor.run {
-            self.token = token
-        }
+        self.token = token
         return token
     }
     
