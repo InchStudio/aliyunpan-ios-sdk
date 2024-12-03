@@ -41,7 +41,13 @@ public actor AliyunpanClient {
             }
         }
     }
-    
+
+    public func resetToken(_ data: Data) {
+        UserDefaults.standard.set(data, forKey: tokenStorageKey)
+        UserDefaults.standard.synchronize()
+        token = try? JSONParameterDecoder().decode(AliyunpanToken.self, from: data)
+    }
+
     public var tokenData: Data? {
         guard let token else { return nil }
         return try? JSONParameterEncoder().encode(token)
