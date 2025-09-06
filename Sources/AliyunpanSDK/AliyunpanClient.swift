@@ -47,6 +47,19 @@ public actor AliyunpanClient {
         UserDefaults.standard.synchronize()
         token = try? JSONParameterDecoder().decode(AliyunpanToken.self, from: data)
     }
+    
+    public func isSameTokenData(_ data: Data) -> Bool {
+        guard let currentTokenData = tokenData else { return false }
+        if let tempToken = try? JSONParameterDecoder().decode(AliyunpanToken.self, from: data) {
+            return tempToken.access_token == token?.access_token
+        }
+        return false
+    }
+    
+    public var isTokenAvailable: Bool {
+        guard let token else { return false }
+        return !token.isExpired
+    }
 
     public var tokenData: Data? {
         guard let token else { return nil }
